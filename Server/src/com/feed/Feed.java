@@ -14,6 +14,8 @@ import com.google.code.morphia.annotations.Id;
 public class Feed {
 
 	@Id ObjectId id;
+	String link;
+	
 	
 	@Embedded
 	List <Item> ListItems;
@@ -37,6 +39,13 @@ public class Feed {
 	}
 	public void setId(ObjectId id) {
 		this.id = id;
+	}
+	
+	public String getLink() {
+		return link;
+	}
+	public void setLink(String link) {
+		this.link = link;
 	}
 	public void sortByDate(){
 		Collections.sort(this.ListItems, new Comparator<Item>() {

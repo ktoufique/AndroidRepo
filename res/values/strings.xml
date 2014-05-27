@@ -12,5 +12,7 @@
     <string name="title_activity_list_view_loader">ListViewLoader</string>
     <string name="title_activity_double_me">DoubleMeActivity</string>
     <string name="title_activity_feed_detail">FeedDetailActivity</string>
+    <string name="realod1">Reload</string>
+    <string name="loading_message">Loading &#8230;</string>
 
 </resources>

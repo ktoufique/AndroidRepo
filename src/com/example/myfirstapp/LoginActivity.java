@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class LoginActivity extends Activity {
 	public final static String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";	    
-	
+
 	/**
 	 * The default email to populate the email field with.
 	 */
@@ -95,7 +95,7 @@ public class LoginActivity extends Activity {
 		getMenuInflater().inflate(R.menu.login, menu);
 		return true;
 	}
-	
+
 	@Override
 	public void finish(){
 		Intent goForward = new Intent(this, DisplayMessageActivity.class);
@@ -217,25 +217,24 @@ public class LoginActivity extends Activity {
 				/* This is what I'm going to add */
 				URL url = new URL("http://ktoufique.rmorpheus.enseirb.fr/MyServletProject/Login");
 				URLConnection connection = url.openConnection();				
-				
+
 				toSend.setTitle(mEmail);
 				toSend.setDescription(mPassword);
-				
+
 				//Log.d("inputString", inputString);
 
 				connection.setDoOutput(true);						
-				
+
 				ObjectMapper mapper = new ObjectMapper();
 				mapper.writeValue(connection.getOutputStream(), toSend);
 				success = mapper.readValue(connection.getInputStream(), Boolean.class);
-				
-				/* This is all folks ! */
+
 			} catch (Exception e) {
 				return false;
 			}
-			
+
 			return success;
-			
+
 			// TODO: register the new account here.
 			//return true;
 		}
@@ -244,7 +243,7 @@ public class LoginActivity extends Activity {
 		protected void onPostExecute(final Boolean success) {
 			mAuthTask = null;
 			showProgress(false);
-			
+
 			if (success) {
 				finish();
 			} else {
@@ -253,7 +252,7 @@ public class LoginActivity extends Activity {
 				mPasswordView.requestFocus();
 			}
 		}
-		
+
 
 		@Override
 		protected void onCancelled() {

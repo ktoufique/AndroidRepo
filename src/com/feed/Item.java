@@ -1,6 +1,5 @@
 package com.feed;
 
-import java.util.Calendar;
 import java.util.Date;
 
 import org.bson.types.ObjectId;
@@ -19,20 +18,18 @@ public class Item implements Comparable <Item> {
 	private String title;
 	private String description;
 	private String uri;
-	private Calendar publishedDate;
+	private Date publishedDate;
 	private String Author;
 
-
-
-
 	public Item() {
-		this.link=null;
-		this.title=null;
-		this.description=null;
-		this.uri=null;
-		this.publishedDate=null;
+		this.id = null;
+		this.link = null;
+		this.title = null;
+		this.description = null;
+		this.uri = null;
+		this.publishedDate = null;
 	}
-
+	
 	public ObjectId getId() {
 		return id;
 	}
@@ -40,7 +37,8 @@ public class Item implements Comparable <Item> {
 	public void setId(ObjectId id) {
 		this.id = id;
 	}
-	
+
+
 
 	public String getAuthor() {
 		return Author;
@@ -77,7 +75,6 @@ public class Item implements Comparable <Item> {
 		return this.description;
 	}
 	public void setDescription(String description){
-		System.out.println("Setting Description");
 		Document doc = Jsoup.parse(description);
 		doc.getElementsByTag("img").remove();
 		this.description = doc.html();;
@@ -88,14 +85,12 @@ public class Item implements Comparable <Item> {
 		return this.uri;
 	}
 
-	public Calendar getPublishedDate() {
+	public Date getPublishedDate() {
 		return this.publishedDate;
 	}
 
 	public void setPublishedDate(Date publishedDate) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(publishedDate);
-		this.publishedDate = cal;
+		this.publishedDate = publishedDate;
 	}
 
 	@Override
@@ -103,6 +98,6 @@ public class Item implements Comparable <Item> {
 		return this.publishedDate.compareTo(item.getPublishedDate());		
 	}
 
-	
+
 }
 

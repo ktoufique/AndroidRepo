@@ -28,7 +28,7 @@ public class MainActivity extends ActionBarActivity {
 	
 	/** Called when the user clicks the Send button */
 	public void goToLogin(View view) {
-	    Intent intent = new Intent(this, DisplayMessageActivity.class);
+	    Intent intent = new Intent(this, LoginActivity.class);
 	    startActivity(intent);
 	}
 

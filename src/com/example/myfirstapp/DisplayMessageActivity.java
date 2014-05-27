@@ -5,30 +5,36 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Fragment;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.feed.Feed;
 import com.feed.Item;
-
 
 
 public class DisplayMessageActivity extends ListActivity {	
@@ -39,6 +45,26 @@ public class DisplayMessageActivity extends ListActivity {
 	ArrayList <String> list = new ArrayList<String>();
 	public final static String EXTRA_TITLE = "com.example.myfirstapp.TITLE";
 	public final static String EXTRA_DESCRIPTION = "com.example.myfirstapp.DESCRIPTION";
+	TextView loadingMessage;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.fragment_display_message);
+		progressBar = (ProgressBar) findViewById(R.id.progressBar1);
+		loadingMessage = (TextView) findViewById(R.id.textView2);
+		showProgress(false);
+		getFeed();	
+	}
+
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu items for use in the action bar
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.display_message, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
 
 	@Override
 	public void finish(){
@@ -46,14 +72,22 @@ public class DisplayMessageActivity extends ListActivity {
 		int[] to = { android.R.id.text1, android.R.id.text2 };
 
 		final Intent intentFromList = new Intent(this, FeedDetailActivity.class);
+		ArrayList<Map<String, String>> listBuilt = buildData(feedList);
 
-		ArrayList<Map<String, String>> list = buildData(feedList);
-		SimpleAdapter adapter = new SimpleAdapter(this, list,
+		SimpleAdapter adapter = new SimpleAdapter(this, listBuilt,
 				android.R.layout.simple_list_item_2, from, to);
 
-		setListAdapter(adapter);
-		ListView list2 = getListView();
-		list2.setOnItemClickListener(new OnItemClickListener() {
+		Log.d("hell", Integer.toString(adapter.getCount())); 
+
+		if(getListView().getAdapter() == null){
+			setListAdapter(adapter);
+		}
+		else{
+			Log.d("chang", "yes");
+			adapter.notifyDataSetChanged();
+		}
+
+		getListView().setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
@@ -64,30 +98,6 @@ public class DisplayMessageActivity extends ListActivity {
 				startActivity(intentFromList);
 			}
 		});
-	}
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		super.onListItemClick(l, v, position, id);
-		// Get the item that was clicked
-		Object o = this.getListAdapter().getItem(position);
-		String keyword = o.toString();
-		Toast.makeText(this, "You selected: " + keyword, Toast.LENGTH_SHORT)
-		.show();
-	}
-
-	/** Called when the user clicks the Send button */
-	public void goToItem(View view) {
-		Intent intent = new Intent(this, FeedDetailActivity.class);
-		startActivity(intent);
-	}
-
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.fragment_display_message);
-		progressBar = (ProgressBar) findViewById(R.id.progressBar1);
-		showProgress(false);
-		getFeed();
 	}
 
 	public void getFeed(){
@@ -108,13 +118,16 @@ public class DisplayMessageActivity extends ListActivity {
 	}
 
 	private String formatData(Item rss){
-		String description = Integer.toString(rss.getPublishedDate().get(Calendar.DAY_OF_MONTH)) 
-				+ "/" + Integer.toString(rss.getPublishedDate().get(Calendar.MONTH)) 
-				+ "/"+ Integer.toString(rss.getPublishedDate().get(Calendar.YEAR));
+		Date date = rss.getPublishedDate();
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		String description = Integer.toString(cal.get(Calendar.DAY_OF_MONTH)) 
+				+ "/" + Integer.toString(cal.get(Calendar.MONTH)) 
+				+ "/"+ Integer.toString(cal.get(Calendar.YEAR));
 		if (rss.getAuthor().length() > 0){
 			description +=" - By "+ rss.getAuthor();
 		}
-				
+
 		return description;
 	}
 	private HashMap<String, String> putData(String title, String description) {
@@ -130,12 +143,16 @@ public class DisplayMessageActivity extends ListActivity {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
+		if (id == R.id.action_reload) {
+			reloading();
 		}
 		return super.onOptionsItemSelected(item);
 	}
 
+	public Boolean reloading() {		
+		getFeed();
+		return true;
+	}
 	/**
 	 * A placeholder fragment containing a simple view.
 	 */
@@ -155,11 +172,12 @@ public class DisplayMessageActivity extends ListActivity {
 
 	private void showProgress(final boolean show) {
 		if (show){
-			progressBar.setVisibility(View.VISIBLE);	
+			progressBar.setVisibility(View.VISIBLE);
+			loadingMessage.setVisibility(View.VISIBLE);
 		} else {
 			progressBar.setVisibility(View.GONE);
+			loadingMessage.setVisibility(View.GONE);
 		}
-
 	}
 
 	/**
@@ -172,6 +190,9 @@ public class DisplayMessageActivity extends ListActivity {
 			// TODO: attempt authentication against a network service.
 			String toSend = "foo@example.com";
 			try {
+				HttpClient httpclient = new DefaultHttpClient();
+				httpclient.execute(new HttpGet("http://ktoufique.rmorpheus.enseirb.fr/MyServletProject/GetFeed"));
+
 				URL url = new URL("http://ktoufique.rmorpheus.enseirb.fr/MyServletProject/GetFeed");
 				URLConnection connection = url.openConnection();				
 
@@ -179,6 +200,7 @@ public class DisplayMessageActivity extends ListActivity {
 
 				ObjectMapper mapper = new ObjectMapper();
 				mapper.writeValue(connection.getOutputStream(), toSend);
+
 				feedList = mapper.readValue(connection.getInputStream(), Feed.class);
 
 			} catch (Exception e) {

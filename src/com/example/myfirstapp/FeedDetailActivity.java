@@ -15,8 +15,6 @@ import android.widget.TextView;
 
 public class FeedDetailActivity extends ActionBarActivity {
 
-
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -48,6 +46,8 @@ public class FeedDetailActivity extends ActionBarActivity {
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.action_settings) {
+			return true;
+		} else if (id == R.id.action_search){
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
